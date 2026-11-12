@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"inventory-api/internal/model"
 	"log"
 	"os"
 
@@ -38,4 +39,12 @@ func ConnectDB(){
 
 	DB = database
 	log.Println("Successfully connected to PostgreSQL database!")
+
+	
+	err = DB.AutoMigrate(&model.User{}, &model.Category{}, &model.Supplier{}, &model.Product{}, &model.StockMovement{})
+	if err != nil {
+		log.Fatal("Failed to auto migrate: ", err)
+	}
+
+	log.Println("Auto Migrate Complete")
 }

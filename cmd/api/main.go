@@ -2,7 +2,9 @@ package main
 
 import (
 	"inventory-api/config"
-	"net/http"
+	"inventory-api/internal/handler"
+	"inventory-api/internal/repository"
+	"inventory-api/internal/service"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -11,15 +13,17 @@ import (
 func main() {
 	config.LoadEnv()
 	config.ConnectDB()
+	userRepo := repository.NewUserRepository(config.DB)
+	authService := service.NewAuthService(userRepo)
+	authHandler := handler.NewAuthHandler(authService)
 
 	r := gin.Default()
 
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"status": "success",
-			"message": "Inventory API is running",
-		})
-	})
+	authRoutes := r.Group("/api/v1/auth")
+	
+	authRoutes.POST("/register", authHandler.Register)
+	authRoutes.POST("/login", authHandler.Login)
+
 
 	port := os.Getenv("APP_PORT")
 	if port == "" {

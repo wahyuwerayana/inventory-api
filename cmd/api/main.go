@@ -17,28 +17,41 @@ func main() {
 	
 	userRepo := repository.NewUserRepository(config.DB)
 	categoryRepo := repository.NewCategoryRepository(config.DB)
+	supplierRepo := repository.NewSupplierRepository(config.DB)
 
 	authService := service.NewAuthService(userRepo)
-	authHandler := handler.NewAuthHandler(authService)
-	
 	categoryService := service.NewCategoryService(categoryRepo)
+	supplierService := service.NewSupplierService(supplierRepo)
+	
+	authHandler := handler.NewAuthHandler(authService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
+	supplierHandler := handler.NewSupplierHandler(supplierService)
 
 	r := gin.Default()
+	apiV1Routes := r.Group("/api/v1")
 
 	// Auth routes
-	authRoutes := r.Group("/api/v1/auth")
+	authRoutes := apiV1Routes.Group("/auth")
 	authRoutes.POST("/register", authHandler.Register)
 	authRoutes.POST("/login", authHandler.Login)
 	
 	// Category Routes
-	categoryRoutes := r.Group("/api/v1/categories")
+	categoryRoutes := apiV1Routes.Group("/categories")
 	categoryRoutes.Use(middleware.AuthMiddleware)
 	categoryRoutes.GET("", categoryHandler.FindAllCategories)
 	categoryRoutes.GET("/:id", categoryHandler.FindCategoryByID)
 	categoryRoutes.POST("", middleware.RoleMiddleware("ADMIN"), categoryHandler.CreateCategory)
 	categoryRoutes.PUT("/:id", middleware.RoleMiddleware("ADMIN"), categoryHandler.UpdateCategory)
 	categoryRoutes.DELETE("/:id", middleware.RoleMiddleware("ADMIN"), categoryHandler.DeleteCategory)
+
+	// Supplier Routes
+	supplierRoutes := apiV1Routes.Group("/suppliers")
+	supplierRoutes.Use(middleware.AuthMiddleware)
+	supplierRoutes.GET("", supplierHandler.FindAllSuppliers)
+	supplierRoutes.GET("/:id", supplierHandler.FindSupplierByID)
+	supplierRoutes.POST("", middleware.RoleMiddleware("ADMIN"), supplierHandler.CreateSupplier)
+	supplierRoutes.PUT("/:id", middleware.RoleMiddleware("ADMIN"), supplierHandler.UpdateSupplier)
+	supplierRoutes.DELETE("/:id", middleware.RoleMiddleware("ADMIN"), supplierHandler.DeleteSupplier)
 
 	port := os.Getenv("APP_PORT")
 	if port == "" {

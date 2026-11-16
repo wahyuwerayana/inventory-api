@@ -14,7 +14,7 @@ func NewCategoryService(r *repository.CategoryRepository) *CategoryService {
 	return &CategoryService{categoryRepo: r}
 }
 
-func (s *CategoryService) CreateCategory(req dto.CategoryRequest) error {
+func (s *CategoryService) CreateCategory(req *dto.CategoryRequest) error {
 	newCategory := &model.Category{
 		Name: req.Name,
 		Description: req.Description,

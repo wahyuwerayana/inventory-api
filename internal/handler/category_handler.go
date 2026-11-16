@@ -27,7 +27,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	err := h.categoryService.CreateCategory(req)
+	err := h.categoryService.CreateCategory(&req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),

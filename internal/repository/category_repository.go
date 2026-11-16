@@ -22,8 +22,7 @@ func (r *CategoryRepository) FindAll() ([]model.Category, error) {
 	var categories []model.Category
 	
 	err := r.db.Find(&categories).Error
-
-	if(err != nil){
+	if err != nil {
 		return nil, err
 	}
 

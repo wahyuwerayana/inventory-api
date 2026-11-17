@@ -40,8 +40,8 @@ func (r *SupplierRepository) FindByID(id uint) (*model.Supplier, error){
 	return &supplier, nil
 }
 
-func (r *SupplierRepository) Update(suplier *model.Supplier) error {
-	return r.db.Save(suplier).Error
+func (r *SupplierRepository) Update(supplier *model.Supplier) error {
+	return r.db.Save(supplier).Error
 }
 
 func (r *SupplierRepository) Delete(id uint) error {

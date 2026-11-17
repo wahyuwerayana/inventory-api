@@ -18,14 +18,17 @@ func main() {
 	userRepo := repository.NewUserRepository(config.DB)
 	categoryRepo := repository.NewCategoryRepository(config.DB)
 	supplierRepo := repository.NewSupplierRepository(config.DB)
+	productRepo := repository.NewProductRepository(config.DB)
 
 	authService := service.NewAuthService(userRepo)
 	categoryService := service.NewCategoryService(categoryRepo)
 	supplierService := service.NewSupplierService(supplierRepo)
+	productService := service.NewProductService(productRepo, categoryRepo, supplierRepo)
 	
 	authHandler := handler.NewAuthHandler(authService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 	supplierHandler := handler.NewSupplierHandler(supplierService)
+	productHandler := handler.NewProductHandler(productService)
 
 	r := gin.Default()
 	apiV1Routes := r.Group("/api/v1")
@@ -52,6 +55,15 @@ func main() {
 	supplierRoutes.POST("", middleware.RoleMiddleware("ADMIN"), supplierHandler.CreateSupplier)
 	supplierRoutes.PUT("/:id", middleware.RoleMiddleware("ADMIN"), supplierHandler.UpdateSupplier)
 	supplierRoutes.DELETE("/:id", middleware.RoleMiddleware("ADMIN"), supplierHandler.DeleteSupplier)
+
+	// Product Routes
+	productRoutes := apiV1Routes.Group("/products")
+	productRoutes.Use(middleware.AuthMiddleware)
+	productRoutes.GET("", productHandler.FindAllProducts)
+	productRoutes.GET("/:id", productHandler.FindProductByID)
+	productRoutes.POST("", middleware.RoleMiddleware("ADMIN"), productHandler.CreateProduct)
+	productRoutes.PUT("/:id", middleware.RoleMiddleware("ADMIN"), productHandler.UpdateProduct)
+	productRoutes.DELETE("/:id", middleware.RoleMiddleware("ADMIN"), productHandler.DeleteProduct)
 
 	port := os.Getenv("APP_PORT")
 	if port == "" {

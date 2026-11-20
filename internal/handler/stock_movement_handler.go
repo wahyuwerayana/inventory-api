@@ -49,15 +49,7 @@ func (h *StockMovementHandler) FindAllStockMovements(c *gin.Context) {
 
 	stockMovementResponses := make([]dto.StockMovementResponse, len(stockMovements))
 	for i, sm := range stockMovements {
-		stockMovementResponses[i] = dto.StockMovementResponse{
-			ID:        sm.ID,
-			ProductName: sm.Product.Name,
-			ProductSKU: sm.Product.SKU,
-			Type: sm.Type,
-			Quantity: sm.Quantity,
-			RecordedBy: sm.User.Name,
-			Notes: sm.Notes,
-		}
+		stockMovementResponses[i] = *dto.ToStockMovementResponse(&sm)
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -78,17 +70,7 @@ func (h *StockMovementHandler) FindStockMovementByID(c *gin.Context) {
 		return
 	}
 
-	stockMovementResponse := dto.StockMovementResponse{
-		ID:        stockMovement.ID,
-		ProductName: stockMovement.Product.Name,
-		ProductSKU: stockMovement.Product.SKU,
-		Type: stockMovement.Type,
-		Quantity: stockMovement.Quantity,
-		RecordedBy: stockMovement.User.Name,
-		Notes: stockMovement.Notes,
-	}
-
 	c.JSON(http.StatusOK, gin.H{
-		"stockMovement": stockMovementResponse,
+		"stockMovement": dto.ToStockMovementResponse(stockMovement),
 	})
 }

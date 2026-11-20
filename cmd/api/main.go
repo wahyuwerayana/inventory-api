@@ -19,16 +19,19 @@ func main() {
 	categoryRepo := repository.NewCategoryRepository(config.DB)
 	supplierRepo := repository.NewSupplierRepository(config.DB)
 	productRepo := repository.NewProductRepository(config.DB)
+	stockMovementRepo := repository.NewStockMovementRepository(config.DB)
 
 	authService := service.NewAuthService(userRepo)
 	categoryService := service.NewCategoryService(categoryRepo)
 	supplierService := service.NewSupplierService(supplierRepo)
 	productService := service.NewProductService(productRepo, categoryRepo, supplierRepo)
-	
+	stockMovementService := service.NewStockMovementService(stockMovementRepo, productRepo)
+
 	authHandler := handler.NewAuthHandler(authService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 	supplierHandler := handler.NewSupplierHandler(supplierService)
 	productHandler := handler.NewProductHandler(productService)
+	stockMovementHandler := handler.NewStockMovementHandler(stockMovementService)
 
 	r := gin.Default()
 	apiV1Routes := r.Group("/api/v1")
@@ -64,6 +67,13 @@ func main() {
 	productRoutes.POST("", middleware.RoleMiddleware("ADMIN"), productHandler.CreateProduct)
 	productRoutes.PUT("/:id", middleware.RoleMiddleware("ADMIN"), productHandler.UpdateProduct)
 	productRoutes.DELETE("/:id", middleware.RoleMiddleware("ADMIN"), productHandler.DeleteProduct)
+
+	// Stock Movement Routes
+	stockMovementRoutes := apiV1Routes.Group("/stock-movements")
+	stockMovementRoutes.Use(middleware.AuthMiddleware)
+	stockMovementRoutes.GET("", stockMovementHandler.FindAllStockMovements)
+	stockMovementRoutes.GET("/:id", stockMovementHandler.FindStockMovementByID)
+	stockMovementRoutes.POST("", stockMovementHandler.CreateStockMovement)
 
 	port := os.Getenv("APP_PORT")
 	if port == "" {
